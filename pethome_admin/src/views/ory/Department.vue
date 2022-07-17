@@ -18,7 +18,7 @@
 		<!--列表-->
     <!--
         :data="departments" 绑定数据
-        v-loading="listLoading" 加载款
+        v-loading="listLoading" 加载框，忙等框
          highlight-current-row 高亮提示
          @selection-change="selsChange" 选中事件
     -->
@@ -26,24 +26,24 @@
               @selection-change="selsChange" style="width: 100%;">
       <el-table-column type="selection" width="55">
       </el-table-column>
-      <el-table-column type="index" label="序号" width="60">
+      <el-table-column type="index" label="序号" width="60" sortable>
       </el-table-column>
       <el-table-column prop="sn" label="部门编号" width="100" sortable>
       </el-table-column>
       <el-table-column prop="name" label="部门名称" width="100" sortable>
       </el-table-column>
-      <el-table-column prop="dirPath" label="部门路径" width="100">
-      </el-table-column>
-      <el-table-column prop="state" label="状态" width="100" sortable>
-        <template slot-scope="scope">
-          <span style="color: green" v-if="scope.row.state==1">正常</span>
-          <span style="color: red" v-else-if="scope.row.state==0">停用</span>
-          <span style="color: darkslategray" v-else>未知</span>
-        </template>
+      <el-table-column prop="dirPath" label="部门路径" width="100" sortable>
       </el-table-column>
       <el-table-column prop="manager.username" label="部门经理" width="100" sortable>
       </el-table-column>
       <el-table-column prop="parent.name" label="上级部门" width="100" sortable>
+      </el-table-column>
+      <el-table-column prop="state" label="状态" width="100" sortable>
+        <template slot-scope="scope">
+          <span style="color: green" v-if="scope.row.state==1">启用</span>
+          <span style="color: red" v-else-if="scope.row.state==0">禁用</span>
+          <span style="color: darkslategray" v-else>未知</span>
+        </template>
       </el-table-column>
       <el-table-column label="操作">
         <template scope="scope">
@@ -56,7 +56,13 @@
 		<!--工具条-->
 		<el-col :span="24" class="toolbar">
 			<el-button type="danger" @click="batchRemove" :disabled="this.sels.length===0">批量删除</el-button>
-			<el-pagination layout="prev, pager, next" @current-change="handleCurrentChange" :current-page="currentPage" :page-size="pageSize" :total="totals" style="float:right;">
+
+			<el-pagination layout="prev, pager, next"
+                     @current-change="handleCurrentChange"
+                     :current-page="currentPage"
+                     :page-size="pageSize"
+                     :total="totals"
+                     style="float:right;">
 			</el-pagination>
 		</el-col>
 
@@ -179,8 +185,9 @@
         let para = {
           currentPage:this.currentPage,
           pageSize:this.pageSize
+          //name:this.filters.name 高级查询才使用
         };
-        //加载框,盲等框
+        //加载框,忙等框
         this.listLoading = true;
         this.$http.post("/department",para).then(res=>{
           this.listLoading = false;
