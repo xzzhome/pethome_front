@@ -4,7 +4,7 @@
 		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
       <el-form :inline="true">
         <el-form-item>
-          <el-input v-model="keyword" placeholder="请输入部门名称或编号"></el-input>
+          <el-input v-model="keyword" placeholder="请输入员工名称"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" v-on:click="keywordQuery">关键字查询</el-button>
@@ -17,26 +17,32 @@
 
 		<!--列表-->
     <!--
-        :data="departments" 绑定数据
+        :data="employee" 绑定数据
         v-loading="listLoading" 加载框，忙等框
          highlight-current-row 高亮提示
          @selection-change="selsChange" 选中事件
     -->
-    <el-table :data="departments" highlight-current-row v-loading="listLoading"
+    <el-table :data="employee" highlight-current-row v-loading="listLoading"
               @selection-change="selsChange" style="width: 100%;">
       <el-table-column type="selection" width="55">
       </el-table-column>
-      <el-table-column type="index" label="序号" width="60" sortable>
+      <el-table-column prop="logininfo_id" label="登录id" width="100" sortable>
       </el-table-column>
-      <el-table-column prop="sn" label="部门编号" width="100" sortable>
+      <el-table-column prop="username" label="员工名称" width="100" sortable>
       </el-table-column>
-      <el-table-column prop="name" label="部门名称" width="100" sortable>
+      <el-table-column prop="phone" label="员工电话" width="110" sortable>
       </el-table-column>
-<!--      <el-table-column prop="dirPath" label="部门路径" width="100" sortable>
-      </el-table-column>-->
-      <el-table-column prop="manager.username" label="部门经理" width="100" sortable>
+      <el-table-column prop="email" label="员工邮箱" width="100" sortable>
       </el-table-column>
-      <el-table-column prop="parent.name" label="上级部门" width="100" sortable>
+      <el-table-column prop="salt" label="员工颜值" width="100" sortable>
+      </el-table-column>
+      <el-table-column prop="password" label="员工密码" width="100" sortable>
+      </el-table-column>
+      <el-table-column prop="age" label="员工年龄" width="100" sortable>
+      </el-table-column>
+      <el-table-column prop="userDept.name" label="员工部门" width="100" sortable>
+      </el-table-column>
+      <el-table-column prop="shopManager.name" label="管理店铺" width="100" sortable>
       </el-table-column>
       <el-table-column prop="state" label="状态" width="100" sortable>
         <template slot-scope="scope">
@@ -69,11 +75,23 @@
 		<!--编辑界面，模态框-->
 		<el-dialog :title="title" :visible.sync="editFormVisible" :close-on-click-modal="false">
 			<el-form :model="editForm" label-width="80px" :rules="editFormRules" ref="editForm">
-        <el-form-item label="编号" prop="sn">
-          <el-input v-model="editForm.sn" auto-complete="off"></el-input>
+        <el-form-item label="电话" prop="phone">
+          <el-input v-model="editForm.phone" auto-complete="off"></el-input>
         </el-form-item>
-				<el-form-item label="部门名称" prop="name">
-					<el-input v-model="editForm.name" auto-complete="off"></el-input>
+				<el-form-item label="员工名称" prop="username">
+					<el-input v-model="editForm.username" auto-complete="off"></el-input>
+				</el-form-item>
+        <el-form-item label="员工邮箱" prop="username">
+					<el-input v-model="editForm.email" auto-complete="off"></el-input>
+				</el-form-item>
+        <el-form-item label="员工颜值" prop="username">
+					<el-input v-model="editForm.salt" auto-complete="off"></el-input>
+				</el-form-item>
+        <el-form-item label="员工密码" prop="username">
+					<el-input v-model="editForm.password" auto-complete="off"></el-input>
+				</el-form-item>
+        <el-form-item label="员工年龄" prop="username">
+					<el-input v-model="editForm.age" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="状态">
 					<el-radio-group v-model="editForm.state">
@@ -82,24 +100,24 @@
 					</el-radio-group>
 				</el-form-item>
         <!--
-          下拉框的部门经理
-          v-for="item in managers" - 遍历，值放在item
+          下拉框的员工经理
+          v-for="item in depts" - 遍历，值放在item
 		      :label="item.username" - 回显哪一个值
 		      :value="item" - 点击提交，跟随模态框，传递到后端的数据
         -->
-        <el-form-item label="部门经理">
-          <el-select clearable v-model="editForm.manager_id" placeholder="请选择">
-            <el-option v-for="item in managers"
-                       :label="item.username"
+        <el-form-item label="所属部门">
+          <el-select clearable v-model="editForm.department_id" placeholder="请选择">
+            <el-option v-for="item in depts"
+                       :label="item.name"
                        :value="item.id">
-              <span style="float: left">{{ item.username }}</span>
-              <span style="float: right; color: #8492a6; font-size: 13px">{{ item.phone }}
+              <span style="float: left">{{ item.name }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">{{ item.sn }}
 		      </span>
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="上级部门">
-          <el-cascader v-model="editForm.parent_id"
+        <el-form-item label="管理店铺">
+          <el-cascader v-model="editForm.shop_id"
                        :options="deptTree"
                        :props="{
             	checkStrictly: true,
@@ -123,48 +141,53 @@
     //定义模型数据
 		data() {
 			return {
-        //1.部门数据列表的模型数据
-        departments: [],//展示页面的数据
+        //1.员工数据列表的模型数据
+        employee: [],//展示页面的数据
         listLoading: false,//加载框，默认不显示
         //2.分页数据
         totals: 0,
         currentPage: 1,
         pageSize: 5,
         //3.高级查询所需数据
-        keyword: null,
+        keyword: '',
 
         filters: {
 					name: ''
 				},
 
-        managers: [],//经理数据
-        deptTree: [],//部门树
+        depts: [],//部门数据
+        deptTree: [],//员工树
 				sels: [],//列表选中列，左边的勾勾
         title:'',
 				editFormVisible: false,//编辑界面是否显示
 				editLoading: false,
 				editFormRules: {
           sn: [
-            { required: true, message: '请输入部门编号', trigger: 'blur' }
+            { required: true, message: '请输入员工编号', trigger: 'blur' }
           ],
 					name: [
-						{ required: true, message: '请输入部门名称', trigger: 'blur' }
+						{ required: true, message: '请输入员工名称', trigger: 'blur' }
 					]
 				},
 				//编辑界面数据
 				editForm: {
 					id: null,
-          sn: '',
-					name: '',
+          username: '',
+          phone: '',
+          email: '',
+          salt: '',
+          password: '',
+          age: null,
           state: 1,
-          manager_id: null,
-          parent_id: null
+          department_id: null,
+          logininfo_id: null,
+          shop_id: null
 				},
 			}
 		},
 		methods: {
-      //1.获取部门列表
-      getDepartments() {
+      //1.获取员工列表
+      getEmployee() {
         //分页参数与高级查询参数，进行封装
         let para = {
           currentPage:this.currentPage,
@@ -174,9 +197,9 @@
         };
         //加载框,忙等框
         this.listLoading = true;
-        this.$http.post("/department",para).then(res=>{
+        this.$http.post("/employee",para).then(res=>{
           this.listLoading = false;
-          this.departments = res.data.data;
+          this.employee = res.data.data;
           this.totals = res.data.totals
         }).catch(res=>{
           this.$message.error("系统繁忙，请稍后重试")
@@ -185,17 +208,13 @@
       //2.当前页，分页数据展示
       handleCurrentChange(val) {
         this.currentPage = val;
-        this.getDepartments();
+        this.getEmployee();
       },
       //3.关键字查询
       keywordQuery(){
         this.currentPage = 1;
-        this.getDepartments();
+        this.getEmployee();
       },
-			//性别显示转换
-			formatSex: function (row, column) {
-				return row.sex == 1 ? '男' : row.sex == 0 ? '女' : '未知';
-			},
 			//删除
 			handleDel: function (index, row) {
 				this.$confirm('确认删除该记录吗?', '提示', {
@@ -203,14 +222,14 @@
 				}).then(() => {
           this.listLoading = true;
           //发送请求
-          this.$http.delete("/department/" + row.id).then(res => {
+          this.$http.delete("/employee/" + row.id).then(res => {
             this.listLoading = false;
             if (res.data.success) {
               this.$message.success("删除成功")
             } else {
               this.$message.error(res.data.msg);
             }
-            this.getDepartments();//刷新页面
+            this.getEmployee();//刷新页面
           }).catch(res => {
             this.$message.error("网络延迟");
           })
@@ -224,7 +243,7 @@
         this.title="编辑"
         //克隆数据：防止对象引用修改显示的数据
 				this.editForm = Object.assign({}, row);
-        this.getManagers();//点击编辑按钮，执行方法，获得经理数据
+        this.getDepts();//点击编辑按钮，执行方法，获得经理数据
         this.getDeptTree();
         this.editFormVisible = true;//弹出模态框
 			},
@@ -233,13 +252,18 @@
         this.title="新增"
 				this.editForm = {
           id: null,
-          sn: '',
-          name: '',
+          username: '',
+          phone: '',
+          email: '',
+          salt: '',
+          password: '',
+          age: null,
           state: 1,
-          manager_id: null,
-          parent_id: null,
+          department_id: null,
+          logininfo_id: null,
+          shop_id: null
 				};
-        this.getManagers();//点击新增按钮，执行方法，获得经理数据
+        this.getDepts();//点击新增按钮，执行方法，获得经理数据
         this.getDeptTree();
         this.editFormVisible = true;
 			},
@@ -252,7 +276,7 @@
 							this.editLoading = true;
 							//克隆数据
 							let para = Object.assign({}, this.editForm);
-              this.$http.put("/department",para).then(res=>{
+              this.$http.put("/employee",para).then(res=>{
                 this.editLoading = false;//关忙等框
                 this.editFormVisible = false;//关模态框
                 if (res.data.success){
@@ -260,7 +284,7 @@
                 }else {
                   this.$message.error(res.data.msg)
                 }
-                this.getDepartments();
+                this.getEmployee();
               }).catch(res=>{
                 this.$message.error("前端错误")
               })
@@ -282,14 +306,14 @@
         .then(() => {
           this.listLoading = true;
           //发送请求
-          this.$http.patch("/department/",ids).then(res => {
+          this.$http.patch("/employee/",ids).then(res => {
             this.listLoading = false;
             if (res.data.success) {
               this.$message.success("删除成功")
             } else {
               this.$message.error(res.data.msg);
             }
-            this.getDepartments();//刷新页面
+            this.getEmployee();//刷新页面
           }).catch(res => {
             this.$message.error("网络延迟");
           })
@@ -297,21 +321,21 @@
           //确认框点击取消之后走这里
 				});
 			},
-      //获取部门经理
-      getManagers(){
-        this.$http.get("/employee").then(res => {
-          this.managers = res.data;
+      //获取员工经理
+      getDepts(){
+        this.$http.get("/department").then(res => {
+          this.depts = res.data;
         })
       },
-      //获取部门树 - 无线级联
+      //获取员工树 - 无线级联
       getDeptTree(){
-        this.$http.get("/department/deptTree").then(res => {
+        this.$http.get("/employee/deptTree").then(res => {
           this.deptTree = res.data;
         })
       }
 		},
 		mounted() {
-			this.getDepartments();
+			this.getEmployee();
 		}
 	}
 
