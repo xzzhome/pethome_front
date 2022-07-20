@@ -32,8 +32,8 @@
       </el-table-column>
       <el-table-column prop="name" label="部门名称" width="100" sortable>
       </el-table-column>
-<!--      <el-table-column prop="dirPath" label="部门路径" width="100" sortable>
-      </el-table-column>-->
+      <el-table-column prop="dirPath" label="部门路径" width="100" sortable>
+      </el-table-column>
       <el-table-column prop="manager.username" label="部门经理" width="100" sortable>
       </el-table-column>
       <el-table-column prop="parent.name" label="上级部门" width="100" sortable>
@@ -66,7 +66,7 @@
 			</el-pagination>
 		</el-col>
 
-		<!--编辑界面，模态框-->
+		<!--编辑界面，模态框，整个编辑框就是对SQL语句参数的双向绑定-->
 		<el-dialog :title="title" :visible.sync="editFormVisible" :close-on-click-modal="false">
 			<el-form :model="editForm" label-width="80px" :rules="editFormRules" ref="editForm">
         <el-form-item label="编号" prop="sn">
@@ -85,7 +85,8 @@
           下拉框的部门经理
           v-for="item in managers" - 遍历，值放在item
 		      :label="item.username" - 回显哪一个值
-		      :value="item" - 点击提交，跟随模态框，传递到后端的数据
+		      :value="item.id" - 点击提交，跟随模态框，传递到后端的数据，实质是SQL中的manager_id
+		      整个编辑框就是对SQL语句参数的双向绑定
         -->
         <el-form-item label="部门经理">
           <el-select clearable v-model="editForm.manager_id" placeholder="请选择">
@@ -98,14 +99,19 @@
             </el-option>
           </el-select>
         </el-form-item>
+        <!--
+          el-cascader - 级联
+            :options="deptTree" - 级联框中需要的数据【集合】
+            :props - 对集合数据进行多层级回显
+        -->
         <el-form-item label="上级部门">
           <el-cascader v-model="editForm.parent_id"
                        :options="deptTree"
                        :props="{
-            	checkStrictly: true,
-                label: 'name', // 级联框显示那个属性的值
-                value: 'id'    // 回显时需要,回传值的时候也需要
-            }" clearable>
+                          checkStrictly: true,
+                          label: 'name', // 级联框显示那个属性的值
+                          value: 'id'    // 回显时需要,回传值的时候也需要
+                        }" clearable>
           </el-cascader>
         </el-form-item>
       </el-form>
@@ -192,11 +198,7 @@
         this.currentPage = 1;
         this.getDepartments();
       },
-			//性别显示转换
-			formatSex: function (row, column) {
-				return row.sex == 1 ? '男' : row.sex == 0 ? '女' : '未知';
-			},
-			//删除
+			//4.删除
 			handleDel: function (index, row) {
 				this.$confirm('确认删除该记录吗?', '提示', {
 					type: 'warning'
@@ -219,7 +221,7 @@
           });
 
 			},
-			//显示编辑界面
+			//5.显示编辑界面
 			handleEdit: function (index, row) {
         this.title="编辑"
         //克隆数据：防止对象引用修改显示的数据
@@ -228,7 +230,7 @@
         this.getDeptTree();
         this.editFormVisible = true;//弹出模态框
 			},
-			//显示新增界面
+			//6.显示新增界面
 			handleAdd: function () {
         this.title="新增"
 				this.editForm = {
@@ -243,7 +245,7 @@
         this.getDeptTree();
         this.editFormVisible = true;
 			},
-			//编辑和添加的提交按钮
+			//7.编辑和添加的提交按钮
 			editSubmit: function () {
         //表单校验
 				this.$refs.editForm.validate((valid) => {
@@ -252,6 +254,14 @@
 							this.editLoading = true;
 							//克隆数据
 							let para = Object.assign({}, this.editForm);
+              //提交数据时上级部门数据格式做处理：
+              let arr = para.parent_id;
+              if(arr && arr.length==0){//点击清理的时候，para.parent_id变为数组，是[]
+                para.parent_id = null;//后端是long类型，要把数组变为long类型，null也可以被long接收
+              }
+              if(arr && arr.length>0){ //[1,13]
+                para.parent_id = arr[arr.length-1];//后端是long类型，要把数组变为long类型
+              }
               this.$http.put("/department",para).then(res=>{
                 this.editLoading = false;//关忙等框
                 this.editFormVisible = false;//关模态框
@@ -268,11 +278,11 @@
 					}
 				});
 			},
-      //勾选时，将本行数据，读取到前端data里面的sels中
+      //8.批量删除---勾选时，将本行数据，读取到前端data里面的sels中
 			selsChange: function (sels) {
 				this.sels = sels;
 			},
-			//批量删除
+			//8.批量删除
 			batchRemove: function () {
         // 将数据sels,通过map方法循环导出单个属性id及其值,读取所有勾选的id，组成的数组[1,2,3,4]
 				var ids = this.sels.map(item => item.id);
@@ -297,13 +307,13 @@
           //确认框点击取消之后走这里
 				});
 			},
-      //获取部门经理
+      //9.获取部门经理
       getManagers(){
         this.$http.get("/employee").then(res => {
           this.managers = res.data;
         })
       },
-      //获取部门树 - 无线级联
+      //10.获取部门树 - 无限级联
       getDeptTree(){
         this.$http.get("/department/deptTree").then(res => {
           this.deptTree = res.data;
