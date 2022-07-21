@@ -1,17 +1,13 @@
 import Login from './views/Login.vue'
 import NotFound from './views/404.vue'
 import Home from './views/Home.vue'
-import Main from './views/Main.vue'
 import Table from './views/nav1/Table.vue'
-import Form from './views/nav1/Form.vue'
-import user from './views/nav1/user.vue'
-import Page4 from './views/nav2/Page4.vue'
-import Page5 from './views/nav2/Page5.vue'
-import Page6 from './views/nav3/Page6.vue'
 import echarts from './views/charts/echarts.vue'
 import Department from "./views/ory/Department";
 import Employee from "./views/ory/Employee";
 import shop from "./views/ory/Shop";
+import systemType from "./views/system/SystemType";
+import systemDetail from "./views/system/SystemDetail";
 
 let routes = [
     {
@@ -58,8 +54,8 @@ let routes = [
             { path: '/permission', component: Table, name: '权限管理' },
             { path: '/menu', component: Table, name: '菜单管理' },
             { path: '/log', component: Table, name: '系统日志' },
-            { path: '/systemdictionarytype', component: Table, name: '数据字典类型' },
-            { path: '/systemdictionarytype', component: Table, name: '数据字典明细' }
+            { path: '/systemType', component: systemType, name: '数据字典类型' },
+            { path: '/systemDetail', component: systemDetail, name: '数据字典明细' }
         ]
     },
     {
