@@ -8,6 +8,7 @@ import Employee from "./views/ory/Employee";
 import shop from "./views/ory/Shop";
 import systemType from "./views/system/SystemType";
 import systemDetail from "./views/system/SystemDetail";
+import system from "./views/system/System";
 
 let routes = [
     {
@@ -55,7 +56,8 @@ let routes = [
             { path: '/menu', component: Table, name: '菜单管理' },
             { path: '/log', component: Table, name: '系统日志' },
             { path: '/systemType', component: systemType, name: '数据字典类型' },
-            { path: '/systemDetail', component: systemDetail, name: '数据字典明细' }
+            { path: '/systemDetail', component: systemDetail, name: '数据字典明细' },
+            { path: '/system', component: system, name: '数据字典' }
         ]
     },
     {

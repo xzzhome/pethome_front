@@ -23,14 +23,15 @@
          @selection-change="selsChange" 选中事件
     -->
     <el-table :data="type" highlight-current-row v-loading="listLoading"
-              @selection-change="selsChange" style="width: 100%;">
+              @selection-change="selsChange" style="width: 100%;" @cell-click="table=true">
       <el-table-column type="selection" width="55">
       </el-table-column>
       <el-table-column prop="sn" label="类型" width="300" sortable>
       </el-table-column>
       <el-table-column prop="name" label="数据类型名称" width="300" sortable>
       </el-table-column>
-      <el-table-column label="操作">
+
+       <el-table-column label="操作">
         <template scope="scope">
           <el-button size="small" @click="handleEdit(scope.$index,scope.row)">编辑</el-button>
           <el-button type="danger" size="small" @click="handleDel(scope.$index,scope.row)">删除</el-button>
@@ -67,6 +68,19 @@
       </div>
     </el-dialog>
 
+<!--    抽屉-->
+    <el-drawer
+        title="类型明细表!"
+        :visible.sync="table"
+        direction="rtl"
+        size="50%">
+      <el-table :data="gridData" >
+        <el-table-column prop="id" label="类型id" width="200"></el-table-column>
+        <el-table-column prop="name" label="类型名称"></el-table-column>
+      </el-table>
+    </el-drawer>
+
+
   </section>
 </template>
 
@@ -75,6 +89,11 @@ export default {
   //定义模型数据类型
   data() {
     return {
+      table: false,
+      dialog: false,
+      loading: false,
+      gridData: [],
+
       //1.数据类型数据类型列表的模型数据类型
       type: [],//展示页面的数据类型
       listLoading: false,//加载框，默认不显示
@@ -105,9 +124,15 @@ export default {
         name: '',
         sn: ''
       },
+      //编辑界面数据类型
+      ctForm: {
+        id: null,
+        name: '',
+      },
     }
   },
   methods: {
+
     //1.获取数据类型列表
     gettype() {
       //分页参数与高级查询参数，进行封装
@@ -261,11 +286,19 @@ export default {
       this.$http.get("/systemType/deptTree").then(res => {
         this.deptTree = res.data;
       })
+    },
+    //11.抽屉
+    //发送请求
+    handlect(){
+      this.$http.get("/systemDetail/").then(res => {
+        this.gridData = res.data;
+      })
     }
+
   },
   mounted() {
     this.gettype();
-
+    this.handlect()
   }
 }
 
