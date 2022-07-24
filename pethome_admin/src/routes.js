@@ -9,6 +9,7 @@ import shop from "./views/ory/Shop";
 import systemType from "./views/system/SystemType";
 import systemDetail from "./views/system/SystemDetail";
 import system from "./views/system/System";
+import ShopRegister from "./views/ShopRegister";
 
 let routes = [
     {
@@ -22,6 +23,12 @@ let routes = [
         component: NotFound,
         name: '',
         hidden: true
+    },
+    {
+        path: '/register',
+        component: ShopRegister,
+        name: '', 	//不需显示name没有意义
+        hidden: true //不需要在菜单显示
     },
     {
         path: '/',
