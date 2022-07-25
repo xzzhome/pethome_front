@@ -12,6 +12,17 @@
         <el-form-item>
           <el-button type="primary" @click="handleAdd">新增</el-button>
         </el-form-item>
+        <el-form-item>
+          <el-button type="success" @click="exportData">导出</el-button>
+        </el-form-item>
+        <el-form-item>
+          <!-- 默认name="file" -->
+          <el-upload class="upload-demo"
+                     action="http://localhost:8080/shop/importExcel"
+                     list-type="text">
+            <el-button type="warning">导入</el-button>
+          </el-upload>
+        </el-form-item>
       </el-form>
 		</el-col>
 
@@ -24,32 +35,61 @@
     -->
     <el-table :data="shop" highlight-current-row v-loading="listLoading"
               @selection-change="selsChange" style="width: 100%;">
-      <el-table-column type="selection" width="55">
-      </el-table-column>
-      <el-table-column prop="name" label="店铺名称" width="100" sortable>
-      </el-table-column>
-      <el-table-column prop="tel" label="店铺电话" width="130" sortable>
-      </el-table-column>
-      <el-table-column prop="registerTime" label="创建时间" width="130" sortable>
-      </el-table-column>
-      <el-table-column prop="address" label="店铺地址" width="160" sortable>
-      </el-table-column>
-      <el-table-column prop="logo" label="店铺logo" width="200" sortable>
-      </el-table-column>
-      <el-table-column prop="manager.username" label="店长" width="100" sortable>
-      </el-table-column>
-      <el-table-column prop="state" label="状态" width="100" sortable>
-        <template slot-scope="scope">
-          <span style="color: green" v-if="scope.row.state==1">已成立</span>
-          <span style="color: red" v-else-if="scope.row.state==4">未成立</span>
-          <span style="color: red" v-else-if="scope.row.state==2">未通过</span>
-          <span style="color: darkslategray" v-else-if="scope.row.state==3">审核中</span>
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <el-table :data="props.row.auditLogs" style="width: calc(100% - 47px)" class="two-list">
+            <el-table-column type="selection" width="55">
+            </el-table-column>
+            <el-table-column type="index" width="60">
+            </el-table-column>
+            <el-table-column prop="state" label="状态">
+              <template slot-scope="props">
+							  <span v-if="props.row.state ==1">
+								  <span style="color:#00B46D">通过</span>
+							  </span>
+                <span v-else>
+								  <span style="color:#D75C89">驳回</span>
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="note" label="备注"></el-table-column>
+            <el-table-column prop="auditManager.username" label="审核人员"></el-table-column>
+            <el-table-column prop="audit_time" label="审核时间"></el-table-column>
+          </el-table>
         </template>
       </el-table-column>
-      <el-table-column label="操作">
+      <el-table-column type="selection" width="55">
+      </el-table-column>
+      <el-table-column type="index" width="60" label="序号" >
+      </el-table-column>
+      <el-table-column prop="name" label="名称" width="150" sortable>
+      </el-table-column>
+      <el-table-column prop="tel" label="电话" width="120" sortable>
+      </el-table-column>
+      <el-table-column prop="registerTime" label="入驻时间" width="120" sortable>
+      </el-table-column>
+      <el-table-column prop="state" label="状态" width="80" sortable>
         <template scope="scope">
-          <el-button size="small" @click="handleEdit(scope.$index,scope.row)">编辑</el-button>
-          <el-button type="danger" size="small" @click="handleDel(scope.$index,scope.row)">删除</el-button>
+          <span v-if="scope.row.state==1" style="color: hotpink">待审核</span>
+          <span v-if="scope.row.state==2" style="color: blue">待激活</span>
+          <span v-if="scope.row.state==3" style="color: green">正常使用</span>
+          <span v-if="scope.row.state==4" style="color: red">驳回</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="address" label="地址" min-width="150" sortable>
+      </el-table-column>
+      <el-table-column prop="logo" label="图标" min-width="100" sortable>
+        <template scope="scope">
+          <img :src="imgPrefix+scope.row.logo" width="50px">
+        </template>
+      </el-table-column>
+      <el-table-column prop="admin.username" label="店长" min-width="80" sortable>
+      </el-table-column>
+      <el-table-column label="操作" width="250">
+        <template scope="scope">
+          <el-button size="small" type="info"  @click="handleEdit(scope.$index, scope.row)">修改</el-button>
+          <el-button size="small" type="danger"  @click="handleDel(scope.$index, scope.row)">删除</el-button>
+          <el-button size="small" type="warning" :disabled="scope.row.state!=1" @click="handleAudit(scope.$index, scope.row)">店铺审核</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -84,10 +124,10 @@
 				</el-form-item>
 				<el-form-item label="状态">
 					<el-radio-group v-model="editForm.state">
-						<el-radio class="radio" :label="1">已成立</el-radio>
-						<el-radio class="radio" :label="4">未成立</el-radio>
-						<el-radio class="radio" :label="2">未通过</el-radio>
-						<el-radio class="radio" :label="3">审核中</el-radio>
+						<el-radio class="radio" :label="1">待审核</el-radio>
+						<el-radio class="radio" :label="2">待激活</el-radio>
+						<el-radio class="radio" :label="3">正常使用</el-radio>
+						<el-radio class="radio" :label="4">驳回</el-radio>
 					</el-radio-group>
 				</el-form-item>
         <el-form-item label="店长">
@@ -108,6 +148,19 @@
 			</div>
 		</el-dialog>
 
+    <!-- 审核模态框 -->
+    <el-dialog title="审核店铺" :visible.sync="shopAuditVisible" :close-on-click-modal="false">
+      <el-form :model="shopAuditLog" label-width="80px"  ref="shopAuditLogForm">
+        <el-form-item label="备注" prop="note">
+          <el-input type="textarea" v-model="shopAuditLog.note"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click.native="shopAuditVisible = false">取消</el-button>
+        <el-button type="primary" @click.native="auditPass">通过</el-button>
+        <el-button type="primary" @click.native="auditReject">驳回</el-button>
+      </div>
+    </el-dialog>
 	</section>
 </template>
 
@@ -116,6 +169,8 @@
     //定义模型数据
 		data() {
 			return {
+        //列表显示图片的前缀
+        imgPrefix:"http://123.207.27.208",
         //1.店铺数据列表的模型数据
         shop: [],//展示页面的数据
         listLoading: false,//加载框，默认不显示
@@ -147,6 +202,13 @@
           state: 1,
           admin_id: null
 				},
+        //审核模态框
+        shopAuditVisible: false,
+        //编辑界面数据
+        shopAuditLog: {
+          shopId: null,
+          note:''
+        }
 			}
 		},
 		methods: {
@@ -285,6 +347,52 @@
           this.managers = res.data;
         })
       },
+      //点击店铺审核弹出模态框
+      handleAudit: function (index, row) {
+        this.shopAuditLog.shop_id = row.id;
+        this.shopAuditVisible = true;
+      },
+      //审核通过
+      auditPass(){
+        this.$http.post("/shop/audit/pass",this.shopAuditLog).then(result=>{
+          result = result.data;
+          if(result.success){
+            this.$message({
+              message: '审核通过',
+              type: 'success'
+            });
+          }else{
+            this.$message({
+              message: '审核失败',
+              type: 'error'
+            });
+          }
+          this.shopAuditVisible = false;
+          this.getShop();
+        })
+      },
+      //审核驳回
+      auditReject(){
+        this.$http.post("/shop/audit/reject",this.shopAuditLog).then(res=>{
+          if(res.data.success){
+            this.$message({
+              message: '驳回成功',
+              type: 'success'
+            });
+          }else{
+            this.$message({
+              message: '驳回失败',
+              type: 'error'
+            });
+          }
+          this.shopAuditVisible = false;
+          this.getShop();
+        })
+      },
+      //导出
+      exportData(){
+        location.href="http://localhost:8080/shop/export";
+      }
 		},
 		mounted() {
 			this.getShop();
