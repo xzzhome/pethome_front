@@ -10,6 +10,8 @@ import systemType from "./views/system/SystemType";
 import systemDetail from "./views/system/SystemDetail";
 import system from "./views/system/System";
 import ShopRegister from "./views/ShopRegister";
+import User from "./views/user/User";
+import logininfo from "./views/user/Logininfo";
 
 let routes = [
     {
@@ -65,6 +67,16 @@ let routes = [
             { path: '/systemType', component: systemType, name: '数据字典类型' },
             { path: '/systemDetail', component: systemDetail, name: '数据字典明细' },
             { path: '/system', component: system, name: '数据字典' }
+        ]
+    },
+    {
+        path: '/',
+        component: Home,
+        name: '用户管理',
+        iconCls: 'el-icon-s-platform',
+        children: [
+            { path: '/user', component: User, name: '用户管理' },
+            { path: '/logininfo', component: logininfo, name: '用户日志管理' },
         ]
     },
     {
