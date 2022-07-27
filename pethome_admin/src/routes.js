@@ -76,7 +76,7 @@ let routes = [
         iconCls: 'el-icon-s-platform',
         children: [
             { path: '/user', component: User, name: '用户管理' },
-            { path: '/logininfo', component: logininfo, name: '用户日志管理' },
+            { path: '/logininfo', component: logininfo, name: '用户登录管理' },
         ]
     },
     {
