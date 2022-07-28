@@ -82,7 +82,7 @@
                             <div class="verification">
                                 <label for="code"><i class="am-icon-code-fork"></i></label>
                                 <input type="tel" name="" id="code" placeholder="请输入验证码">
-                                <button type="button" id="dyMobileButton" onclick="sendMobileCode();">获取</button>
+                                <button type="button" id="dyMobileButton" @click="sendMobileCode" >获取</button>
                             </div>
                             <div class="user-pass">
                                 <label for="password"><i class="am-icon-lock"></i></label>
@@ -150,7 +150,7 @@
                 phone:'',
             },
             base64ImageCode: '', //获取图形验证码响应一个base64位的字符串
-            base64ImageCodePrefix: 'data:image/jpeg;base64,',
+
         },
         methods:{
             //只是生成UUID
@@ -178,12 +178,55 @@
                 //2.发送异步请求并携带key
                 this.$http.get("/verifyCode/image/" + key).then(res => {
                     //3.在回调函数获取响应的数据与拼接前缀 绑定到src
-                    this.base64ImageCode = this.base64ImageCodePrefix+res.data.resultObj;
+                    this.base64ImageCode = 'data:image/jpeg;base64,'+res.data.resultObj;
                 })
             },
             //获取手机验证码
             sendMobileCode(){
+                //1.判断手机号不为空
+                if(!this.phoneUserForm.phone){
+                    alert("手机号不能为空");
+                    return;
+                }
+                //2.判断图片验证码不为空
+                if(!this.phoneUserForm.imageCode){
+                    alert("图片验证码不能为空");
+                    return;
+                }
+                //3.获取按钮，禁用按钮  发送时灰化不能使用，发送成功倒计时60才能使用，如果发送失败立即可以发送
+                var sendBtn = $(event.target);
+                sendBtn.attr("disabled",true);
 
+                var param = {
+                    phone: this.phoneUserForm.phone,
+                    imageCode: this.phoneUserForm.imageCode,
+                    imageCodeKey: localStorage.getItem("phoneRegisterCodeKey")
+                };
+                //4.发送ajax请求
+                this.$http.post("/verifyCode/smsCode",param).then(res=>{
+                    if(res.data.success){
+                        alert("手机验证码已经发送到您的手机，请在3分钟内使用");
+                        //4.1.发送成：倒计时
+                        var time = 60;
+                        var interval = window.setInterval( function () {
+                            //每一条倒计时减一
+                            time = time - 1 ;
+                            //把倒计时时间搞到按钮上
+                            sendBtn.html(time);
+                            //4.2.倒计时完成恢复按钮
+                            if(time <= 0){
+                                sendBtn.html("重新发送");
+                                sendBtn.attr("disabled",false);
+                                //清除定时器
+                                window.clearInterval(interval);
+                            }
+                        },1000);
+                    }else{
+                        //4.3.发送失败：提示，恢复按钮
+                        sendBtn.attr("disabled",false);
+                        alert("发送失败:"+res.data.msg);
+                    }
+                })
             }
         },
         mounted(){
