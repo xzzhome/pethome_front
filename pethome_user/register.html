@@ -81,16 +81,16 @@
                             </div>
                             <div class="verification">
                                 <label for="code"><i class="am-icon-code-fork"></i></label>
-                                <input type="tel" name="" id="code" placeholder="请输入验证码">
+                                <input v-model="phoneUserForm.phoneCode" type="tel" name="" id="code" placeholder="请输入验证码">
                                 <button type="button" id="dyMobileButton" @click="sendMobileCode" >获取</button>
                             </div>
                             <div class="user-pass">
                                 <label for="password"><i class="am-icon-lock"></i></label>
-                                <input type="password" name="" id="password" placeholder="设置密码">
+                                <input v-model="phoneUserForm.password" type="password" name="" id="password" placeholder="设置密码">
                             </div>
                             <div class="user-pass">
                                 <label for="passwordRepeat"><i class="am-icon-lock"></i></label>
-                                <input type="password" name="" id="passwordRepeat" placeholder="确认密码">
+                                <input v-model="phoneUserForm.confirmPassword" type="password" name="" id="passwordRepeat" placeholder="确认密码">
                             </div>
                         </form>
                         <div class="login-links">
@@ -99,7 +99,7 @@
                             </label>
                         </div>
                         <div class="am-cf">
-                            <input type="submit" name="" value="注册" class="am-btn am-btn-primary am-btn-sm am-fl">
+                            <input type="submit" name="" value="注册" @click="phoneRegister" class="am-btn am-btn-primary am-btn-sm am-fl">
                         </div>
 
                         <hr>
@@ -145,12 +145,15 @@
     new Vue({
         el: "#phoneForm",
         data:{
-            phoneUserForm:{
-                imageCode:'',
-                phone:'',
-            },
             base64ImageCode: '', //获取图形验证码响应一个base64位的字符串
-
+            //整个注册页面的数据
+            phoneUserForm:{
+                phone:'',//手机号
+                imageCode:'',//图片验证码
+                phoneCode: "",//短信验证码
+                password: "",//密码
+                confirmPassword: ""//再次输入密码
+            },
         },
         methods:{
             //只是生成UUID
@@ -227,6 +230,20 @@
                         alert("发送失败:"+res.data.msg);
                     }
                 })
+            },
+            //注册按钮发送请求
+            phoneRegister(){
+                //前台一般做校验：空校验，格式校验，重复密码校验
+                this.$http.post('/user/register/phone',this.phoneUserForm).then(res => {
+                    //注册成功跳转到登录页面
+                    if (res.data.success){
+                        location.href="login.html";
+                    }else{
+                        alert(res.data.msg);
+                    }
+                }).catch(res => {
+                    alert("系统错误!")
+                });
             }
         },
         mounted(){
