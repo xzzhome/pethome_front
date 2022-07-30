@@ -26,23 +26,44 @@ Vue.use(Vuex)
 const router = new VueRouter({
   routes
 })
-//发送每一个路由请求之前。都经过下面判断
-/*router.beforeEach((to, from, next) => {
-  //NProgress.start();
-  if (to.path == '/login') {
-    sessionStorage.removeItem('user');
-  }
-  let user = JSON.parse(sessionStorage.getItem('user'));
-  if (!user && to.path != '/login') {
-    next({ path: '/login' })
-  } else {
-    next()
-  }
-})*/
 
-//router.afterEach(transition => {
-//NProgress.done();
-//});
+//======================路由的前端拦截器【拦截不到后端的请求】====================//
+router.beforeEach((to, from, next) => {
+  if (to.path == '/login' || to.path == "/register") {
+    localStorage.removeItem("token");
+    localStorage.removeItem("logininfo");
+    next();//放行
+  }else{
+    let logininfo = localStorage.getItem('logininfo');
+    if (logininfo) {
+      next();
+    } else {
+      next({path: '/login'});//跳转到login
+    }
+  }
+})
+
+//======================axios的前置拦截器【拦截调用后端的请求，在这个请求头加token，保持登录状态】====================//
+axios.interceptors.request.use(res=>{
+  let token = localStorage.getItem("token");
+  if(token){
+    res.headers["token"] = token;
+  }
+  return res;
+},error => {
+  Promise.reject(error)
+})
+
+//======================axios的后置拦截器【处理后台登录拦截的结果】====================//
+axios.interceptors.response.use(res => {
+  //后端响应的是没有登录的信息
+  if (false === res.data.success && "noLogin" === res.data.msg) {
+    router.push({path: '/login'});
+  }
+  return res;
+},error => {
+  Promise.reject(error)
+})
 
 new Vue({
   //el: '#app',

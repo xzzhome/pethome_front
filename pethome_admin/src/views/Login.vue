@@ -1,15 +1,15 @@
 <template>
   <el-form :model="ruleForm2" :rules="rules2" ref="ruleForm2" label-position="left" label-width="0px" class="demo-ruleForm login-container">
     <h3 class="title">系统登录</h3>
-    <el-form-item prop="account">
-      <el-input type="text" v-model="ruleForm2.account" auto-complete="off" placeholder="账号"></el-input>
+    <el-form-item prop="username">
+      <el-input type="text" v-model="ruleForm2.username" auto-complete="off" placeholder="账号"></el-input>
     </el-form-item>
-    <el-form-item prop="checkPass">
-      <el-input type="password" v-model="ruleForm2.checkPass" auto-complete="off" placeholder="密码"></el-input>
+    <el-form-item prop="password">
+      <el-input type="password" v-model="ruleForm2.password" auto-complete="off" placeholder="密码"></el-input>
     </el-form-item>
     <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>
     <el-form-item style="width:100%;">
-      <el-button type="primary" style="width:48%;" @click.native.prevent="handleSubmit2" :loading="logining">登录</el-button>
+      <el-button type="primary" style="width:48%;" @click.native.prevent="login" :loading="logining">登录</el-button>
       <el-button type="success" style="width:48%;" @click.native.prevent="goRegister">店铺入驻</el-button>
     </el-form-item>
   </el-form>
@@ -23,15 +23,16 @@
       return {
         logining: false,
         ruleForm2: {
-          account: 'admin',
-          checkPass: '123456'
+          username: '18708146211',
+          password: '1',
+          loginType: 0
         },
         rules2: {
-          account: [
+          username: [
             { required: true, message: '请输入账号', trigger: 'blur' },
             //{ validator: validaePass }
           ],
-          checkPass: [
+          password: [
             { required: true, message: '请输入密码', trigger: 'blur' },
             //{ validator: validaePass2 }
           ]
@@ -40,37 +41,46 @@
       };
     },
     methods: {
+      //店铺入驻
       goRegister() {
-        //要跳转到路由的路径 - 之间登录成功之后的跳转代码
-        this.$router.push({ path: '/register' });
+        this.$router.push({ path: '/register' });//要跳转到路由的路径 - 之间登录成功之后的跳转代码
       },
       handleReset2() {
         this.$refs.ruleForm2.resetFields();
       },
-      handleSubmit2(ev) {
-        var _this = this;
+      //登录
+      login() {
         this.$refs.ruleForm2.validate((valid) => {
           if (valid) {
-            //_this.$router.replace('/table');
-            this.logining = true;
-            //NProgress.start();
-            var loginParams = { username: this.ruleForm2.account, password: this.ruleForm2.checkPass };
-            requestLogin(loginParams).then(data => {
-              this.logining = false;
-              //NProgress.done();
-              let { msg, code, user } = data;
-              if (code !== 200) {
+            this.logining = true; //显示忙等框
+            this.$http.post("/login/account",this.ruleForm2).then(res=>{
+              this.logining = false; //不管失败和成功：都要去掉忙等框
+              if(res.data.success){
                 this.$message({
-                  message: msg,
+                  message: "登录成功",
+                  type: 'success'
+                });
+                //2.将token和logininfo保存到localStrorage中
+                let {token,logininfo}  = res.data.resultObj;  //解构表达式：快捷获取
+                localStorage.setItem("token",token);
+                //注意：保存的是json格式的字符串，那么获取的时候需要进行转换才能使用json对象
+                localStorage.setItem("logininfo",JSON.stringify(logininfo));//拿到的是一个对象，需要转成json格式字符串
+                //3.跳转到首页
+                this.$router.push({path: '/echarts'});
+              }else{
+                this.$message({
+                  message: res.data.msg,
                   type: 'error'
                 });
-              } else {
-                sessionStorage.setItem('user', JSON.stringify(user));
-                this.$router.push({ path: '/echarts' });
               }
-            });
+            }).catch(res=>{
+              this.$message({
+                message: "系统错误",
+                type: 'error'
+              });
+            })
           } else {
-            console.log('error submit!!');
+            this.$message.error("验证不通过，提交失败!");
             return false;
           }
         });

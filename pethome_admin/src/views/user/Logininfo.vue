@@ -165,7 +165,7 @@ export default {
       };
       //加载框,忙等框
       this.listLoading = true;
-      this.$http.post("/logininfo",para).then(res=>{
+      this.$http.post("/login",para).then(res=>{
         this.listLoading = false;
         this.logininfos = res.data.data;
         this.totals = res.data.totals
@@ -190,7 +190,7 @@ export default {
       }).then(() => {
         this.listLoading = true;
         //发送请求
-        this.$http.delete("/logininfo/" + row.id).then(res => {
+        this.$http.delete("/login/" + row.id).then(res => {
           this.listLoading = false;
           if (res.data.success) {
             this.$message.success("删除成功")
@@ -249,7 +249,7 @@ export default {
             if(arr && arr.length>0){ //[1,13]
               para.parent_id = arr[arr.length-1];//后端是long类型，要把数组变为long类型
             }
-            this.$http.put("/logininfo",para).then(res=>{
+            this.$http.put("/login",para).then(res=>{
               this.editLoading = false;//关忙等框
               this.editFormVisible = false;//关模态框
               if (res.data.success){
@@ -279,7 +279,7 @@ export default {
           .then(() => {
             this.listLoading = true;
             //发送请求
-            this.$http.patch("/logininfo/",ids).then(res => {
+            this.$http.patch("/login/",ids).then(res => {
               this.listLoading = false;
               if (res.data.success) {
                 this.$message.success("删除成功")
@@ -302,7 +302,7 @@ export default {
     },
     //10.获取用户树 - 无限级联
     getDeptTree(){
-      this.$http.get("/logininfo/deptTree").then(res => {
+      this.$http.get("/login/deptTree").then(res => {
         this.deptTree = res.data;
       })
     }
