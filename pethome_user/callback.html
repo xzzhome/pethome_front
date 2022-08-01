@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>回调</title>
+
+    <!-- 引入vue + axios + common.js -->
+    <script src="js/plugins/vue/dist/vue.js"></script>
+    <script src="js/plugins/axios/dist/axios.js"></script>
+    <script src="js/plugins/common.js"></script>
+</head>
+<body>
+<div id="myDiv">
+
+</div>
+<script type="text/javascript">
+    new Vue({
+        el:"#myDiv",
+        mounted(){
+            //解析参数对象
+            let url = location.href;
+            let code = parseUrlParams2Obj(url).code;//切割出来code，通过KV形式保存
+            //发起微信登录请求  调用微信登录接口
+            this.$http.get("/login/wechat/"+code)
+                .then(result=>{
+                    if(result.data.success){ //已经关联了 免密登录之后，需要调到主页
+                        //1.保存返回的token，logininfo到localStorage
+                        let {token,logininfo} = result.data.resultObj;
+                        localStorage.setItem("token",token);
+                        localStorage.setItem("logininfo",JSON.stringify(logininfo));
+                        //2.跳转到首页，显示当前登录人
+                        location.href="index.html";
+                    }else{ //没有关联跳转绑定页面   "?accessToken="+accessToken+"&openId="+openId;
+                        //跳转到绑定页面
+                        var access_token = result.data.resultObj.access_token;
+                        var openid = result.data.resultObj.openid;
+                        location.href = "/binder.html?accessToken="+access_token+"&openId="+openid;
+                    }
+                })
+                .catch(result=>{
+                    alert("系统繁忙，请稍后重试!!!")
+                })
+        }
+    });
+</script>
+</body>
+</html>
