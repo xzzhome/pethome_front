@@ -11,7 +11,7 @@
 			</el-col>
 			<el-col :span="4" class="userinfo">
 				<el-dropdown trigger="hover">
-					<span class="el-dropdown-link userinfo-inner"><img :src="this.sysUserAvatar" /> {{sysUserName}}</span>
+					<span class="el-dropdown-link userinfo-inner"><img src="../../img/ecy.jpg" height="40"/> {{sysUserName}}</span>
 					<el-dropdown-menu slot="dropdown">
 						<el-dropdown-item>我的消息</el-dropdown-item>
 						<el-dropdown-item>设置</el-dropdown-item>
@@ -78,7 +78,7 @@
 				sysName:'宠物乐园后台管理',
 				collapsed:false,
 				sysUserName: '',
-				sysUserAvatar: '',
+				sysUserAvatar: '../../img/ecy.jpg',
 				form: {
 					name: '',
 					region: '',

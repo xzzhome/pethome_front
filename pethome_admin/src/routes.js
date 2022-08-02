@@ -12,6 +12,9 @@ import system from "./views/system/System";
 import ShopRegister from "./views/ShopRegister";
 import User from "./views/user/User";
 import logininfo from "./views/user/Logininfo";
+import Menu from "./views/system/Menu";
+import Role from "./views/system/Role";
+import Permission from "./views/system/Permission";
 
 let routes = [
     {
@@ -60,9 +63,9 @@ let routes = [
         name: '系统管理',
         iconCls: 'el-icon-s-platform',
         children: [
-            { path: '/role', component: Table, name: '角色管理' },
-            { path: '/permission', component: Table, name: '权限管理' },
-            { path: '/menu', component: Table, name: '菜单管理' },
+            { path: '/role', component: Role, name: '角色管理' },
+            { path: '/permission', component: Permission, name: '权限管理' },
+            { path: '/menu', component: Menu, name: '菜单管理' },
             { path: '/log', component: Table, name: '系统日志' },
             { path: '/systemType', component: systemType, name: '数据字典类型' },
             { path: '/systemDetail', component: systemDetail, name: '数据字典明细' },
