@@ -42,7 +42,12 @@
       </el-table-column>
       <el-table-column prop="userDept.name" label="员工部门" width="100" sortable>
       </el-table-column>
-      <el-table-column prop="shopManager.name" label="管理店铺" width="100" sortable>
+      <el-table-column prop="shop_id" label="员工类型" width="120" sortable>
+        <!-- 自定义模板：通过scope可以获取到当前行对象：scope.row -->
+        <template scope="scope">
+          <span style="color: green" v-if="scope.row.shop_id">店铺管理员</span>
+          <span style="color: red" v-else>系统管理员</span>
+        </template>
       </el-table-column>
       <el-table-column prop="state" label="状态" width="100" sortable>
         <template slot-scope="scope">
@@ -116,15 +121,18 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="管理店铺">
-          <el-cascader v-model="editForm.shop_id"
-                       :options="deptTree"
-                       :props="{
-            	checkStrictly: true,
-                label: 'name', // 级联框显示那个属性的值
-                value: 'id'    // 回显时需要,回传值的时候也需要
-            }" clearable>
-          </el-cascader>
+        <el-form-item label="角色">
+          <!-- 员工可以选择多个角色：他们是多对多关系 - 所以有中间表 -->
+          <!-- 这里我们设计的是一个员工选一个角色 -->
+          <el-select v-model="editForm.role_id" value-key="id" placeholder="请选择" clearable>
+            <el-option
+                v-for="item in roles"
+                :label="item.name"
+                :value="item.id">
+              <span style="float: left">{{ item.name }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">{{ item.sn }}</span>
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
 			<div slot="footer" class="dialog-footer">
@@ -157,6 +165,8 @@
 
         depts: [],//部门数据
         deptTree: [],//员工树
+        //为员工分配角色
+        roles: [],
 				sels: [],//列表选中列，左边的勾勾
         title:'',
 				editFormVisible: false,//编辑界面是否显示
@@ -181,7 +191,9 @@
           state: 1,
           department_id: null,
           logininfo_id: null,
-          shop_id: null
+          shop_id: null,
+          //为员工添加或修改角色
+          role_id: null
 				},
 			}
 		},
@@ -245,6 +257,7 @@
 				this.editForm = Object.assign({}, row);
         this.getDepts();//点击编辑按钮，执行方法，获得经理数据
         this.getDeptTree();
+        this.getRoles();
         this.editFormVisible = true;//弹出模态框
 			},
 			//显示新增界面
@@ -261,10 +274,13 @@
           state: 1,
           department_id: null,
           logininfo_id: null,
-          shop_id: null
+          shop_id: null,
+          //为员工添加或修改角色
+          role_id: null
 				};
         this.getDepts();//点击新增按钮，执行方法，获得经理数据
         this.getDeptTree();
+        this.getRoles();
         this.editFormVisible = true;
 			},
 			//编辑和添加的提交按钮
@@ -331,6 +347,11 @@
       getDeptTree(){
         this.$http.get("/employee/deptTree").then(res => {
           this.deptTree = res.data;
+        })
+      },
+      getRoles(){
+        this.$http.get("/role").then(res => {
+          this.roles = res.data;
         })
       }
 		},

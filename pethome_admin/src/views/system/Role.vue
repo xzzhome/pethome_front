@@ -55,15 +55,15 @@
           <el-input v-model="saveForm.sn" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="分配菜单" prop="menus">
-          <el-cascader v-model="saveForm.menus" clearable
+          <el-cascader v-model="saveForm.menus"
                        placeholder="试试搜索：指南"
                        :options="menuTree"
                        :props="{
-									multiple: true,
-								 	label:'name',
-									value:'id'
-								 }"
-                       filterable></el-cascader>
+                          multiple: true,
+                          label:'name',
+                          value:'id'
+                       }" clearable filterable>
+          </el-cascader>
         </el-form-item>
         <el-form-item label="分配权限" prop="permissions">
           <el-select v-model="saveForm.permissions" multiple placeholder="请选择">
