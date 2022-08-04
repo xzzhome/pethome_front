@@ -61,12 +61,17 @@
                   type: 'success'
                 });
                 //2.将token和logininfo保存到localStrorage中
-                let {token,logininfo}  = res.data.resultObj;  //解构表达式：快捷获取
+                let {token,logininfo,menus,permissions}  = res.data.resultObj;   //解构表达式：快捷获取
                 localStorage.setItem("token",token);
                 //注意：保存的是json格式的字符串，那么获取的时候需要进行转换才能使用json对象
                 localStorage.setItem("logininfo",JSON.stringify(logininfo));//拿到的是一个对象，需要转成json格式字符串
+                localStorage.setItem("menus",JSON.stringify(menus));
+                localStorage.setItem("permissions",JSON.stringify(permissions));
                 //3.跳转到首页
+
                 this.$router.push({path: '/echarts'});
+                location.reload();
+
               }else{
                 this.$message({
                   message: res.data.msg,

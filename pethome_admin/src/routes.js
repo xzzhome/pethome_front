@@ -3,9 +3,9 @@ import NotFound from './views/404.vue'
 import Home from './views/Home.vue'
 import Table from './views/nav1/Table.vue'
 import echarts from './views/charts/echarts.vue'
-import Department from "./views/ory/Department";
-import Employee from "./views/ory/Employee";
-import shop from "./views/ory/Shop";
+import Department from "./views/org/Department";
+import Employee from "./views/org/Employee";
+import shop from "./views/org/Shop";
 import systemType from "./views/system/SystemType";
 import systemDetail from "./views/system/SystemDetail";
 import system from "./views/system/System";
@@ -46,7 +46,7 @@ let routes = [
         ]
     },
     //{ path: '/main', component: Main },
-    {
+    /*{
         path: '/',
         component: Home,
         name: '组织机构模块',
@@ -71,17 +71,7 @@ let routes = [
             { path: '/systemDetail', component: systemDetail, name: '数据字典明细' },
             { path: '/system', component: system, name: '数据字典' }
         ]
-    },
-    {
-        path: '/',
-        component: Home,
-        name: '用户管理',
-        iconCls: 'el-icon-s-platform',
-        children: [
-            { path: '/user', component: User, name: '用户管理' },
-            { path: '/logininfo', component: logininfo, name: '用户登录管理' },
-        ]
-    },
+    },*/
     {
         path: '*',
         hidden: true,
