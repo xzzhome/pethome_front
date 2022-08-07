@@ -44,7 +44,7 @@ let routes = [
         children: [
             { path: '/echarts', component: echarts, name: '首页' }
         ]
-    },
+    }
     //{ path: '/main', component: Main },
     /*{
         path: '/',
@@ -72,11 +72,11 @@ let routes = [
             { path: '/system', component: system, name: '数据字典' }
         ]
     },*/
-    {
+    /*{
         path: '*',
         hidden: true,
         redirect: { path: '/404' }
-    }
+    }*/
 ];
 
 export default routes;

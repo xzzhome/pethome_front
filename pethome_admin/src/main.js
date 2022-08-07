@@ -100,7 +100,7 @@ function initIndexRouters(){
     return;
   }
   //防止重复配置路由：5就是main.js中路由的个数 - 如果你的静态路由是6个这里要写成6
-  if(router.options.routes.length>5){
+  if(router.options.routes.length>4){
     return;
   }
   let menus = localStorage.getItem('menus');
