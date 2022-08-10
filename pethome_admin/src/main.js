@@ -14,6 +14,12 @@ import axios from "axios";
 axios.defaults.baseURL='http://localhost:8080';
 Vue.prototype.$http=axios;
 
+import BaiduMap from 'vue-baidu-map'
+Vue.use(BaiduMap, {
+  /* Visit http://lbsyun.baidu.com/apiconsole/key for details about app key. */
+  ak: 'ZEBuvDGr2IssAqDDqUqOOWZeK9AWHNb6'
+})
+
 import routes from './routes'
 
 import 'font-awesome/css/font-awesome.min.css'
